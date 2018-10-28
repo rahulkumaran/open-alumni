@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8" />
+		<meta content="IE=edge" http-equiv="X-UA-Compatible" />
+		<meta name="keywords" content="" />
+		<meta name="description" content="" />
+		<meta name="author" content="Rahul Arulkumaran" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/style.css') }}">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<title>Alumni Website</title>
+	</head>
+
+	<body>
+		<nav class="navbar navbar-inverse">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="{{ url_for('index') }}">Open Alumni Website</a>
+				</div>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="{{ url_for('index') }}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+					<li><a href="#"><span class="glyphicon glyphicon-question-sign"></span> About Us</a></li>
+					<li><a href="{{ url_for('alumni') }}"><span class="glyphicon glyphicon-user"></span> Alumni</a></li>
+					<li><a href="#"><span class="glyphicon glyphicon-earphone"></span> Contact Us</a></li>
+				</ul>
+			</div>
+		</nav> 
+
+{% block body %}{% endblock %}
+{% include 'includes/_footer.html' %}
+
+	</body>
+</html>
