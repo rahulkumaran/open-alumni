@@ -29,6 +29,21 @@ def alumni_batch(batch):
 	else:
 		return render_template("404.html")
 
+@app.route("/alumni/<string:batch>/<string:firstname>-<string:lastname>")
+def individual_page(batch, firstname, lastname):
+	if(batch=="2020"):
+		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname)
+	elif(batch=="2021"):
+		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname)
+	elif(batch=="2022"):
+		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname)
+	elif(batch=="2023"):
+		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname)
+	else:
+		return render_template("404.html")
+
+
+
 @app.errorhandler(404) 
 def not_found(e):
 	return render_template("404.html")
