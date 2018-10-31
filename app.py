@@ -18,14 +18,21 @@ def alumni():
 
 @app.route("/alumni/<batch>")
 def alumni_batch(batch):
+
+	# Get first name and last name from batch
+	# select firstname, lastname from student where batch=2020 -> SQL Statement
+	# We'll get set of first and last names
+	# Manipulate to get [[firstname1, lastname1],[firstname2, lastname2],[firstname3,lastname3],..]
+	# Store as batch_list and send that as param to batch_list
+
 	if(batch=="2020"):
-		return render_template("alumni_batch.html")
+		return render_template("alumni_batch.html", batch=batch, batch_list=[["2020","Rahul","Arulkumaran"],["2020","Rul","Arulkun"]])
 	elif(batch=="2021"):
-		return render_template("alumni_batch.html")
+		return render_template("alumni_batch.html", batch=batch, batch_list=["2021","Athish","Rao"])
 	elif(batch=="2022"):
-		return render_template("alumni_batch.html")
+		return render_template("alumni_batch.html", batch=batch, batch_list=["1","2","3"])
 	elif(batch=="2023"):
-		return render_template("alumni_batch.html")
+		return render_template("alumni_batch.html", batch=batch, batch_list=["1","2","3"])
 	else:
 		return render_template("404.html")
 
