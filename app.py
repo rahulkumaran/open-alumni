@@ -18,6 +18,19 @@ mysql.init_app(app)
 
 logging.basicConfig(filename='usage.log',level=logging.DEBUG)
 
+def fetch_names(cursor, batch):
+	data_temp = cursor.execute("SELECT fname, lname from temp where batch='" + batch + "\';")	#change to batch instead of branch
+	data = cursor.fetchall()
+	print(data)
+	return data
+
+def get_individual_data(cursor, firstname, lastname, batch):
+	#print("SELECT exp from temp where (fname='" + firstname + "', lname='" + lastname + "', batch=" + batch + ");")
+	data_temp = cursor.execute("SELECT exp from temp where (fname='" + firstname + "' and lname='" + lastname + "' and batch=" + batch + ");")	#change to batch instead of branch
+	data = cursor.fetchall()
+	print(data)
+	return data
+
 @app.route("/", methods=['GET', 'POST'])
 def index():
 	return render_template("index.html")
@@ -33,39 +46,46 @@ def alumni_batch(batch):
 	# select firstname, lastname from student where batch=2020 -> SQL Statement
 	# We'll get set of first and last names
 	# Manipulate to get [[firstname1, lastname1],[firstname2, lastname2],[firstname3,lastname3],..]
-	# Store as batch_list and send that as param to batch_list
 	cursor = mysql.get_db().cursor()
 	#print(cursor)
-	if(batch=="2020"):
-		data_temp = cursor.execute("SELECT fname, lname from temp where branch='CSE'")
-		data = cursor.fetchall()
-		print(data)
+	print(batch)
+	if(batch=="2018"):
+		data = fetch_names(cursor, "2018")
+		return render_template("alumni_batch.html", batch=batch, batch_list=data)
+	elif(batch=="2019"):
+		data = fetch_names(cursor, "2019")
+		return render_template("alumni_batch.html", batch=batch, batch_list=data)
+	elif(batch=="2020"):
+		data = fetch_names(cursor, "2020")
 		return render_template("alumni_batch.html", batch=batch, batch_list=data)
 	elif(batch=="2021"):
-		return render_template("alumni_batch.html", batch=batch, batch_list=["2021","Athish","Rao"])
-	elif(batch=="2022"):
-		return render_template("alumni_batch.html", batch=batch, batch_list=["1","2","3"])
-	elif(batch=="2023"):
-		return render_template("alumni_batch.html", batch=batch, batch_list=["1","2","3"])
+		data = fetch_names(cursor, "2021")
+		return render_template("alumni_batch.html", batch=batch, batch_list=data)
 	else:
 		return render_template("404.html")
 
 @app.route("/alumni/<string:batch>/<string:firstname>-<string:lastname>")
 def individual_page(batch, firstname, lastname):
-	if(batch=="2020"):
-		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname)
+	cursor = mysql.get_db().cursor()
+	if(batch=="2018"):
+		data = get_individual_data(cursor, firstname, lastname, batch)
+		print(data)
+		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname, exp=data[0][0])
+	elif(batch=="2019"):
+		data = get_individual_data(cursor, firstname, lastname, batch)
+		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname, exp=data[0][0])
+	elif(batch=="2020"):
+		data = get_individual_data(cursor, firstname, lastname, batch)
+		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname, exp=data[0][0])
 	elif(batch=="2021"):
-		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname)
-	elif(batch=="2022"):
-		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname)
-	elif(batch=="2023"):
-		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname)
+		data = get_individual_data(cursor, firstname, lastname, batch)
+		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname, exp=data[0][0])
 	else:
 		return render_template("404.html")
 
 
 
-@app.errorhandler(404) 
+@app.errorhandler(404)
 def not_found(e):
 	return render_template("404.html")
 
