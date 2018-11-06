@@ -4,27 +4,48 @@ from flaskext.mysql import *
 
 
 DEBUG = True
-app = Flask(__name__)
-app.config.from_object(__name__)
+app = Flask(__name__)	#initialising flask
+app.config.from_object(__name__)	#configuring flask
 app.config['SECRET_KEY'] = '7d441f27d441f27567d441f2b6176a'
 
-mysql = MySQL()
+mysql = MySQL()	#initialising mysql-flask connection
 app = Flask(__name__)
-app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_USER'] = 'root'	#db credentials being given from here
 app.config['MYSQL_DATABASE_PASSWORD'] = '123456789'
-app.config['MYSQL_DATABASE_DB'] = 'std_list'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-mysql.init_app(app)
+app.config['MYSQL_DATABASE_DB'] = 'std_list'	#name of database to be used
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'	#name of lost the website is operating on
+mysql.init_app(app)	#initialising connection finally
 
 logging.basicConfig(filename='usage.log',level=logging.DEBUG)
 
 def fetch_names(cursor, batch):
+	'''
+	Function that gets firstname and
+	lastname of all students from a
+	particular batch for alumni_batch.html
+	page in the templates folder.
+
+	## ABOUT THE ARGS ##
+	cursor : To establish connection with tables
+	batch : To query in database with batch
+	'''
 	data_temp = cursor.execute("SELECT fname, lname from temp where batch='" + batch + "\';")	#change to batch instead of branch
 	data = cursor.fetchall()
 	print(data)
 	return data
 
 def get_individual_data(cursor, firstname, lastname, batch):
+	'''
+	Function that gets experience of a
+	student from a particular batch for
+	individual_page.html in templates folder.
+
+	## ABOUT THE ARGS ##
+	cursor : To establish connection with tables
+	firstname : To query in db with firstname
+	lastname : To query in db with lastname
+	batch : To query in database with batch
+	'''
 	#print("SELECT exp from temp where (fname='" + firstname + "', lname='" + lastname + "', batch=" + batch + ");")
 	data_temp = cursor.execute("SELECT exp from temp where (fname='" + firstname + "' and lname='" + lastname + "' and batch=" + batch + ");")	#change to batch instead of branch
 	data = cursor.fetchall()
@@ -33,20 +54,37 @@ def get_individual_data(cursor, firstname, lastname, batch):
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
-	return render_template("index.html")
+	'''
+	The root route, i.e. the landing page
+	'''
+	return render_template("index.html")	#render_template basically renders the html code of page mentioned as arg when needed
 
 @app.route("/alumni")
 def alumni():
+	'''
+	The route, in local hosting case,
+	"localhost:5000/alumni" is displayed.
+	The alumni.html page is rendered here.
+	'''
 	return render_template("alumni.html")
 
 @app.route("/alumni/<batch>")
 def alumni_batch(batch):
+	'''
+	Crucial route here. /alumni/batch
+	Example : /alumni/2018, /alumni/2019, etc.
+	Gets the list of all students in a particular
+	batch by querying in db and displays them in
+	the website in alumni_batch.html page.
 
+	batch here is a variable so it changes
+	depending on when and where it is clicked from
+	'''
 	# Get first name and last name from batch
 	# select firstname, lastname from student where batch=2020 -> SQL Statement
-	# We'll get set of first and last names
-	# Manipulate to get [[firstname1, lastname1],[firstname2, lastname2],[firstname3,lastname3],..]
-	cursor = mysql.get_db().cursor()
+	# We'll get set of first and last names in the format
+	#((firstname1, lastname1),(firstname2, lastname2),(firstname3,lastname3),..)
+	cursor = mysql.get_db().cursor()	#creating cursor that's needed for querying from program
 	#print(cursor)
 	print(batch)
 	if(batch=="2018"):
@@ -66,6 +104,18 @@ def alumni_batch(batch):
 
 @app.route("/alumni/<string:batch>/<string:firstname>-<string:lastname>")
 def individual_page(batch, firstname, lastname):
+	'''
+	This is an individual_page for everyone.
+	Contets change depending on the name of
+	student that one clicks on.
+	Example of route : /alumni/2020/XYZ-ABC, /alumni/2019/XYZ-ABC
+	In both cases, XYZ, ABC are firstname and lastname respectively
+	and the batch is 2020 and 2019 respectively.
+
+	batch, firstname and lastname are vars here
+	and change depending on where they are clicked
+	from and when they are clicked.
+	'''
 	cursor = mysql.get_db().cursor()
 	if(batch=="2018"):
 		data = get_individual_data(cursor, firstname, lastname, batch)
@@ -87,11 +137,19 @@ def individual_page(batch, firstname, lastname):
 
 @app.errorhandler(404)
 def not_found(e):
+	'''
+	Error message displayed if Page
+	not found or user tries accessing
+	a page that doesn't exist or have access to
+	'''
 	return render_template("404.html")
 
 
 @app.errorhandler(500)
 def application_error(e):
+	'''
+	Error handler for unexpected errors.
+	'''
 	return 'Sorry, unexpected error: {}'.format(e), 500
 
 
