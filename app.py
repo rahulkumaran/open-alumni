@@ -1,11 +1,21 @@
 from flask import Flask, render_template, flash, request, redirect, url_for
 import logging
+from flaskext.mysql import *
 
 
 DEBUG = True
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['SECRET_KEY'] = '7d441f27d441f27567d441f2b6176a'
+
+mysql = MySQL()
+app = Flask(__name__)
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = '123456789'
+app.config['MYSQL_DATABASE_DB'] = 'std_list'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+mysql.init_app(app)
+
 logging.basicConfig(filename='usage.log',level=logging.DEBUG)
 
 @app.route("/", methods=['GET', 'POST'])
@@ -24,9 +34,13 @@ def alumni_batch(batch):
 	# We'll get set of first and last names
 	# Manipulate to get [[firstname1, lastname1],[firstname2, lastname2],[firstname3,lastname3],..]
 	# Store as batch_list and send that as param to batch_list
-
+	cursor = mysql.get_db().cursor()
+	#print(cursor)
 	if(batch=="2020"):
-		return render_template("alumni_batch.html", batch=batch, batch_list=[["2020","Rahul","Arulkumaran"],["2020","Rul","Arulkun"]])
+		data_temp = cursor.execute("SELECT fname, lname from temp where branch='CSE'")
+		data = cursor.fetchall()
+		print(data)
+		return render_template("alumni_batch.html", batch=batch, batch_list=data)
 	elif(batch=="2021"):
 		return render_template("alumni_batch.html", batch=batch, batch_list=["2021","Athish","Rao"])
 	elif(batch=="2022"):
@@ -62,4 +76,4 @@ def application_error(e):
 
 
 if(__name__ == "__main__"):
-	app.run(host="localhost", port="8080")
+	app.run(host="localhost", port=5000)
