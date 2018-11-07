@@ -82,8 +82,10 @@ def search():
 			firstname = request.form['firstname']
 			lastname = request.form['lastname']
 			data = search_by_name(cursor, firstname, lastname)
-			print(data)
-			return render_template("search.html", form=form, batch_list=data)
+			if(str(data) != "()"):
+				return render_template("search.html", form=form, batch_list=data)
+			else:
+				return render_template("search.html", form=form, batch_list="()")
 	return render_template("search.html", form=form)	#render_template basically renders the html code of page mentioned as arg when needed
 
 @app.route("/alumni")
