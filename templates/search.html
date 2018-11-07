@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+	<center><h1>Search For Specific Alumni</h1></center>
+	<form action="" method="post">
+		{{ form.csrf }}
+		<center>
+			<div class="input text">
+				{{ form.firstname.label }} <br> {{ form.firstname }} <br/><br/>
+				{{ form.lastname.label }} <br> {{ form.lastname }} <br/><br/>
+			</div>
+			<div class="input submit">
+				<input type="submit" value="Submit" />
+			</div>
+		</center>
+	</form>
+
+	<div align="center" style="margin-left:20px;">
+	{% for details in batch_list %}
+	  <center>
+	    <div class="col-sm-3" style="width: 150px;height: 200px;padding: 25px;border: 2px solid black; margin-right:100px; margin-bottom:20px;">
+	  	   <a href="{{ url_for('individual_page', batch=details[2], firstname=details[0], lastname=details[1]) }}"><h4>{{ details[0]}} {{ details[1] }}</h4></a><br/>
+				 <span class="lead">Class of {{ details[2] }}</span>
+	    </div>
+	  </center>
+	{% endfor %}
+
+{% endblock %}
