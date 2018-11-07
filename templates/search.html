@@ -17,6 +17,9 @@
 	</form>
 
 	<div align="center" style="margin-left:20px;">
+	{% if batch_list == "()" %}
+		<center><h1>Sorry, but we couldn't find anyone with the given first and last name.<br/> Try searching again.</h1></center>
+	{% else %}
 	{% for details in batch_list %}
 	  <center>
 	    <div class="col-sm-3" style="width: 150px;height: 200px;padding: 25px;border: 2px solid black; margin-right:100px; margin-bottom:20px;">
@@ -25,5 +28,6 @@
 	    </div>
 	  </center>
 	{% endfor %}
+	{% endif %}
 
 {% endblock %}
