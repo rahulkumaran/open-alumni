@@ -1,4 +1,5 @@
 from flask import Flask, render_template, flash, request, redirect, url_for
+from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
 import logging
 from flaskext.mysql import *
 
@@ -17,6 +18,10 @@ app.config['MYSQL_DATABASE_HOST'] = 'localhost'	#name of lost the website is ope
 mysql.init_app(app)	#initialising connection finally
 
 logging.basicConfig(filename='usage.log',level=logging.DEBUG)
+
+class ReusableForm(Form):
+	firstname = TextField('Firstname:', validators=[validators.DataRequired()])
+	lastname = TextField('Lastname:', validators=[validators.DataRequired()])
 
 def fetch_names(cursor, batch):
 	'''
@@ -52,12 +57,34 @@ def get_individual_data(cursor, firstname, lastname, batch):
 	print(data)
 	return data
 
+def search_by_name(cursor, firstname, lastname):
+	data_temp = cursor.execute("SELECT fname, lname, batch from temp where (fname='" + firstname + "' and lname='" + lastname + "');")	#change to batch instead of branch
+	data = cursor.fetchall()
+	print(data)
+	return data
+
 @app.route("/", methods=['GET', 'POST'])
 def index():
 	'''
 	The root route, i.e. the landing page
 	'''
 	return render_template("index.html")	#render_template basically renders the html code of page mentioned as arg when needed
+
+@app.route("/search", methods=['GET', 'POST'])
+def search():
+	'''
+	The route to search for specific people
+	'''
+	form = ReusableForm(request.form)
+	cursor = mysql.get_db().cursor()
+	if(request.method == 'POST'):
+		if(form.validate()):
+			firstname = request.form['firstname']
+			lastname = request.form['lastname']
+			data = search_by_name(cursor, firstname, lastname)
+			print(data)
+			return render_template("search.html", form=form, batch_list=data)
+	return render_template("search.html", form=form)	#render_template basically renders the html code of page mentioned as arg when needed
 
 @app.route("/alumni")
 def alumni():
