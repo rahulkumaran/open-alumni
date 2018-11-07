@@ -20,6 +20,11 @@ mysql.init_app(app)	#initialising connection finally
 logging.basicConfig(filename='usage.log',level=logging.DEBUG)
 
 class ReusableForm(Form):
+	'''
+	Form to perform the search functionality
+	in the /search route where one needs to
+	type in the first and last name
+	'''
 	firstname = TextField('Firstname:', validators=[validators.DataRequired()])
 	lastname = TextField('Lastname:', validators=[validators.DataRequired()])
 
@@ -50,6 +55,9 @@ def get_individual_data(cursor, firstname, lastname, batch):
 	firstname : To query in db with firstname
 	lastname : To query in db with lastname
 	batch : To query in database with batch
+
+	Returns experience of the students whose
+	firstname, lastname and batch match.
 	'''
 	#print("SELECT exp from temp where (fname='" + firstname + "', lname='" + lastname + "', batch=" + batch + ");")
 	data_temp = cursor.execute("SELECT exp from temp where (fname='" + firstname + "' and lname='" + lastname + "' and batch=" + batch + ");")	#change to batch instead of branch
@@ -58,6 +66,14 @@ def get_individual_data(cursor, firstname, lastname, batch):
 	return data
 
 def search_by_name(cursor, firstname, lastname):
+	'''
+	Gets the firstname, lastname and batch
+	from the table temp given a firstname and
+	lastname in the /search route.
+
+	Returns all fields that match the given
+	first and lastname by the user.
+	'''
 	data_temp = cursor.execute("SELECT fname, lname, batch from temp where (fname='" + firstname + "' and lname='" + lastname + "');")	#change to batch instead of branch
 	data = cursor.fetchall()
 	print(data)
@@ -73,20 +89,24 @@ def index():
 @app.route("/search", methods=['GET', 'POST'])
 def search():
 	'''
-	The route to search for specific people
+	The route to search for specific people.
+	One can give a particular firstname and
+	lastname and we return all people whose
+	first and lastnames match with the name
+	entered by the user in the /search form.
 	'''
-	form = ReusableForm(request.form)
+	form = ReusableForm(request.form)	#Creating a form object
 	cursor = mysql.get_db().cursor()
-	if(request.method == 'POST'):
-		if(form.validate()):
-			firstname = request.form['firstname']
-			lastname = request.form['lastname']
-			data = search_by_name(cursor, firstname, lastname)
-			if(str(data) != "()"):
-				return render_template("search.html", form=form, batch_list=data)
-			else:
+	if(request.method == 'POST'):		#If the user submits data in the Form
+		if(form.validate()):		#If form is validated
+			firstname = request.form['firstname']	#Get firstname
+			lastname = request.form['lastname']		#Get lastname
+			data = search_by_name(cursor, firstname, lastname)	#Search DB for given first and lastname
+			if(str(data) != "()"):	#Check if null tuple
+				return render_template("search.html", form=form, batch_list=data)	#Pass data if not null tuple
+			else:	#if null tuple, pass the string format of null tuple --> "()"
 				return render_template("search.html", form=form, batch_list="()")
-	return render_template("search.html", form=form)	#render_template basically renders the html code of page mentioned as arg when needed
+	return render_template("search.html", form=form)
 
 @app.route("/alumni")
 def alumni():
