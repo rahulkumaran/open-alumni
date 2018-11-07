@@ -14,7 +14,7 @@ The alumni from the batch of {{ batch }} are:<br><br>
 {% for details in batch_list %}
   <center>
     <div class="col-sm-3" style="width: 150px;height: 200px;padding: 25px;border: 2px solid black; margin-right:100px; margin-bottom:20px;">
-  	   <a href="{{ url_for('individual_page', batch=batch, firstname=details[0], lastname=details[1]) }}"><h4>{{ details[0]}} {{ details[1] }}</h4></a>
+  	   <a href="{{ url_for('individual_page', batch=batch, firstname=details[0], lastname=details[1]) }}"><h4>{{ details[0]}} {{ details[1] }}</h4></a><br><span class="lead">Class of {{ batch }}</span>
     </div>
   </center>
 {% endfor %}
