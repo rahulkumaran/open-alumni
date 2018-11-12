@@ -1,7 +1,8 @@
 from flask import Flask, render_template, flash, request, redirect, url_for
-from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
-import logging
 from flaskext.mysql import *
+from forms import *
+import logging
+from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
 
 
 DEBUG = True
@@ -27,6 +28,10 @@ class ReusableForm(Form):
 	'''
 	firstname = TextField('Firstname:', validators=[validators.DataRequired()])
 	lastname = TextField('Lastname:', validators=[validators.DataRequired()])
+
+class LoginForm(Form):
+	email = TextField('Email', validators=[validators.DataRequired()])
+	password = TextField('Password', validators=[validators.DataRequired()])
 
 def fetch_names(cursor, batch):
 	'''
