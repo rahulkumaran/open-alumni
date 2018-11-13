@@ -1,5 +1,6 @@
-from flask import Flask, render_template, flash, request, redirect, url_for
+from flask import Flask, render_template, flash, request, redirect, url_for, session
 from flaskext.mysql import *
+from flask_login import current_user
 from forms import *
 import logging
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
@@ -20,18 +21,8 @@ mysql.init_app(app)	#initialising connection finally
 
 logging.basicConfig(filename='usage.log',level=logging.DEBUG)
 
-class ReusableForm(Form):
-	'''
-	Form to perform the search functionality
-	in the /search route where one needs to
-	type in the first and last name
-	'''
-	firstname = TextField('Firstname:', validators=[validators.DataRequired()])
-	lastname = TextField('Lastname:', validators=[validators.DataRequired()])
+is_user_active = False
 
-class LoginForm(Form):
-	email = TextField('Email', validators=[validators.DataRequired()])
-	password = TextField('Password', validators=[validators.DataRequired()])
 
 def fetch_names(cursor, batch):
 	'''
@@ -83,6 +74,12 @@ def search_by_name(cursor, firstname, lastname):
 	data = cursor.fetchall()
 	print(data)
 	return data
+
+def update_exp(cursor, experience, firstname, lastname, batch):
+	data_temp = cursor.execute("UPDATE temp SET exp='" + experience + "' where (fname='" + firstname + "' and lname='" + lastname + "' and batch=" + batch + ");")
+	data = cursor.fetchall()
+	print(data)
+
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
@@ -187,6 +184,21 @@ def individual_page(batch, firstname, lastname):
 	else:
 		return render_template("404.html")
 
+@app.route("/update-experience", methods=['GET','POST'])
+def update_experience():
+	form = UpdateForm(request.form)	#Creating a form object
+	cursor = mysql.get_db().cursor()
+	if(request.method == 'POST'):		#If the user submits data in the Form
+		if(form.validate()):		#If form is validated
+			firstname = request.form['firstname']	#Get firstname
+			lastname = request.form['lastname']	#Get firstname
+			batch = request.form['batch']	#Get firstname
+			experience = request.form['update']	#Get firstname
+			update_exp(cursor, experience, firstname, lastname, batch)
+			#flash("Done updating your experience.")
+			print(firstname, lastname, experience, batch)
+			return render_template("index.html")
+	return render_template("update_experience.html", form=form)
 
 
 @app.errorhandler(404)
