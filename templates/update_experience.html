@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+  <center><h1>Update Your Experience</h1></center>
+  <form action="" method="post">
+    {{ form.csrf }}
+    <center>
+      <div class="input text">
+        {{ form.firstname.label }} <br> {{ form.firstname }} <br/><br/>
+        {{ form.lastname.label }} <br> {{ form.lastname }} <br/><br/>
+        {{ form.batch.label }} <br> {{ form.batch }} <br/><br/>
+        {{ form.update.label }} <br> {{ form.update }} <br/><br/>
+      </div>
+      <div class="input submit">
+        <input type="submit" value="Submit" />
+      </div>
+    </center>
+  </form>
+
+{% endblock %}
