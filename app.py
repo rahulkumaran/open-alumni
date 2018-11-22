@@ -11,13 +11,17 @@ app = Flask(__name__)	#initialising flask
 app.config.from_object(__name__)	#configuring flask
 app.config['SECRET_KEY'] = '7d441f27d441f27567d441f2b6176a'
 
-mysql = MySQL()	#initialising mysql-flask connection
+mysql = MySQL()
 app = Flask(__name__)
 app.config['MYSQL_DATABASE_USER'] = 'root'	#db credentials being given from here
 app.config['MYSQL_DATABASE_PASSWORD'] = '123456789'
 app.config['MYSQL_DATABASE_DB'] = 'std_list'	#name of database to be used
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'	#name of lost the website is operating on
 mysql.init_app(app)	#initialising connection finally
+
+conn = mysql.connect()
+
+conn.autocommit = True
 
 logging.basicConfig(filename='usage.log',level=logging.DEBUG)
 
@@ -35,7 +39,7 @@ def fetch_names(cursor, batch):
 	cursor : To establish connection with tables
 	batch : To query in database with batch
 	'''
-	data_temp = cursor.execute("SELECT fname, lname from temp where batch='" + batch + "\';")	#change to batch instead of branch
+	data_temp = cursor.execute("SELECT Fname, Lname from Details where Batch='" + batch + "\';")	#change to batch instead of branch
 	data = cursor.fetchall()
 	print(data)
 	return data
@@ -56,7 +60,8 @@ def get_individual_data(cursor, firstname, lastname, batch):
 	firstname, lastname and batch match.
 	'''
 	#print("SELECT exp from temp where (fname='" + firstname + "', lname='" + lastname + "', batch=" + batch + ");")
-	data_temp = cursor.execute("SELECT exp from temp where (fname='" + firstname + "' and lname='" + lastname + "' and batch=" + batch + ");")	#change to batch instead of branch
+	rollno = get_rollno(cursor, firstname, lastname, batch)
+	data_temp = cursor.execute("SELECT experiance from Exp where Rollno=" + rollno + ";")	#change to batch instead of branch
 	data = cursor.fetchall()
 	print(data)
 	return data
@@ -70,16 +75,53 @@ def search_by_name(cursor, firstname, lastname):
 	Returns all fields that match the given
 	first and lastname by the user.
 	'''
-	data_temp = cursor.execute("SELECT fname, lname, batch from temp where (fname='" + firstname + "' and lname='" + lastname + "');")	#change to batch instead of branch
+	data_temp = cursor.execute("SELECT Fname, Lname, Batch from Details where (fname='" + firstname + "' and lname='" + lastname + "');")	#change to batch instead of branch
 	data = cursor.fetchall()
 	print(data)
 	return data
 
 def update_exp(cursor, experience, firstname, lastname, batch):
-	data_temp = cursor.execute("UPDATE temp SET exp='" + experience + "' where (fname='" + firstname + "' and lname='" + lastname + "' and batch=" + batch + ");")
+	rollno = get_rollno(cursor, firstname, lastname, batch)
+	data_temp = cursor.execute("UPDATE Exp SET experiance='" + experience + "' where Rollno=" + rollno + ";")
+	conn.autocommit = True
 	data = cursor.fetchall()
 	print(data)
 
+def update_contact(cursor, email, firstname, lastname, batch):
+	rollno = get_rollno(cursor, firstname, lastname, batch)
+	data_temp = cursor.execute("UPDATE Contact_Details SET EmailID='" + email + "' where Rollno=" + rollno + ";")
+	conn.autocommit = True
+	data = cursor.fetchall()
+	print(data)
+
+def update_location(cursor, location, firstname, lastname, batch):
+	rollno = get_rollno(cursor, firstname, lastname, batch)
+	data_temp = cursor.execute("UPDATE Current_Location SET Location='" + location + "' where Rollno=" + rollno + ";")
+	conn.autocommit = True
+	data = cursor.fetchall()
+	print(data)
+
+def get_loc(cursor,firstname, lastname, batch):
+	rollno = get_rollno(cursor, firstname, lastname, batch)
+	data_temp = cursor.execute("SELECT Location from Current_Location where Rollno=" + rollno + ";")
+	data = cursor.fetchall()
+	print(data)
+	return data
+
+def get_email(cursor, firstname, lastname, batch):
+	rollno = get_rollno(cursor, firstname, lastname, batch)
+	data_temp = cursor.execute("SELECT EmailID from Contact_Details where Rollno=" + rollno + ";")
+	data = cursor.fetchall()
+	print(data[0][0])
+	return data[0][0]
+
+
+def get_rollno(cursor, firstname, lastname, batch):
+	print("in here")
+	data_temp = cursor.execute("SELECT Rollno from Details where (Fname='" + firstname + "' and Lname='" + lastname + "' and Batch=" + batch + ");")
+	data = cursor.fetchall()
+	print(data[0][0])
+	return data[0][0]
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
@@ -170,23 +212,32 @@ def individual_page(batch, firstname, lastname):
 	cursor = mysql.get_db().cursor()
 	if(batch=="2018"):
 		data = get_individual_data(cursor, firstname, lastname, batch)
+		loc = get_loc(cursor, firstname, lastname, batch)
+		email = get_email(cursor, firstname, lastname, batch)
 		print(data)
-		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname, exp=data[0][0])
+		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname, exp=data[0][0], location=loc[0][0], email=email)
 	elif(batch=="2019"):
 		data = get_individual_data(cursor, firstname, lastname, batch)
-		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname, exp=data[0][0])
+		loc = get_loc(cursor, firstname, lastname, batch)
+		email = get_email(cursor, firstname, lastname, batch)
+		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname, exp=data[0][0], location=loc[0][0], email=email)
 	elif(batch=="2020"):
 		data = get_individual_data(cursor, firstname, lastname, batch)
-		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname, exp=data[0][0])
+		loc = get_loc(cursor, firstname, lastname, batch)
+		email = get_email(cursor, firstname, lastname, batch)
+		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname, exp=data[0][0], location=loc[0][0], email=email)
 	elif(batch=="2021"):
 		data = get_individual_data(cursor, firstname, lastname, batch)
-		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname, exp=data[0][0])
+		loc = get_loc(cursor, firstname, lastname, batch)
+		email = get_email(cursor, firstname, lastname, batch)
+		return render_template("individual_page.html", batch=batch, firstname=firstname, lastname=lastname, exp=data[0][0], location=loc[0][0], email=email)
 	else:
 		return render_template("404.html")
 
 @app.route("/update-experience", methods=['GET','POST'])
 def update_experience():
 	form = UpdateForm(request.form)	#Creating a form object
+	conn.autocommit = True
 	cursor = mysql.get_db().cursor()
 	if(request.method == 'POST'):		#If the user submits data in the Form
 		if(form.validate()):		#If form is validated
@@ -220,4 +271,4 @@ def application_error(e):
 
 
 if(__name__ == "__main__"):
-	app.run(host="localhost", port=5000)
+	app.run(host="localhost", port=8000)
