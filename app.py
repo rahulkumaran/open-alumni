@@ -1,23 +1,28 @@
-from db.funcs import *
-from flask import Flask, render_template, flash, request, redirect, url_for, session
-from flaskext.mysql import *
-from flask_login import current_user
-from forms import *
+import os
 import logging
+from forms import *
+from db.funcs import *
+from pathlib import Path  # python3 only
+from flaskext.mysql import *
+from dotenv import load_dotenv
+from flask_login import current_user
+from flask import Flask, render_template, flash, request, redirect, url_for, session
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
 
-
 DEBUG = True
+# Load the secrets from the '.secrets' file
+env_path = Path('.') / '.secrets'	
+load_dotenv(dotenv_path=env_path, verbose=DEBUG)
+
 app = Flask(__name__)	#initialising flask
 app.config.from_object(__name__)	#configuring flask
-app.config['SECRET_KEY'] = '7d441f27d441f27567d441f2b6176a'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 mysql = MySQL()
-app = Flask(__name__)
-app.config['MYSQL_DATABASE_USER'] = 'root'	#db credentials being given from here
-app.config['MYSQL_DATABASE_PASSWORD'] = '123456789'
-app.config['MYSQL_DATABASE_DB'] = 'std_list'	#name of database to be used
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'	#name of lost the website is operating on
+app.config['MYSQL_DATABASE_USER']     = os.getenv('MYSQL_DATABASE_USER') #db credentials being given from here
+app.config['MYSQL_DATABASE_PASSWORD'] = os.getenv('MYSQL_DATABASE_PASSWORD')
+app.config['MYSQL_DATABASE_DB']       = os.getenv('MYSQL_DATABASE_DB') #name of database to be used
+app.config['MYSQL_DATABASE_HOST']     = os.getenv('MYSQL_DATABASE_HOST') #name of lost the website is operating on
 mysql.init_app(app)	#initialising connection finally
 
 conn = mysql.connect()
